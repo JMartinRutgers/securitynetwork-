@@ -1,0 +1,85 @@
+1. View All Active Connections
+netstat Commands for Security Monitoring
+# Show all active connections and listening ports
+netstat -tuplan
+
+# Breakdown of flags:
+# -t: TCP connections
+# -u: UDP connections
+# -p: Show process/program name
+# -l: Show only listening sockets
+# -a: Show all sockets (listening and established)
+# -n: Show numerical addresses
+2. Check for Suspicious Listening Ports
+
+
+2. Check for Suspicious Listening Ports
+# Show only listening ports
+netstat -tlpn
+
+# Show processes listening on unusual high ports (>50000)
+netstat -tlpn | grep -E ':[5-9][0-9]{4}'
+
+3. Monitor Established Connections
+# Show only established connections
+netstat -tpn | grep ESTABLISHED
+
+# Count connections per IP
+netstat -tpn | grep ESTABLISHED | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr
+
+
+4. Check for Common Attack Patterns
+# Look for SYN_RECV states (possible SYN flood)
+netstat -tpn | grep SYN_RECV | wc -l
+
+# Check for many connections from single IP (possible DoS)
+netstat -tpn | grep ESTABLISHED | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr | head -n 10
+
+5. Common Suspicious Indicators
+Large numbers of CLOSE_WAIT or FIN_WAIT states
+Multiple connections to unusual ports
+Connections to known malicious IPs
+Excessive number of connections from single source
+
+lsof Commands for Security Analysis
+1. Network Connection Overview
+
+# Show all network connections
+lsof -i
+
+# Show only IPv4 connections
+lsof -i4
+
+# Show only IPv6 connections
+lsof -i6
+
+2. Monitor Specific Ports
+# Check specific port
+lsof -i:80
+
+# Check port ranges
+lsof -i:1-1024
+
+# Show all listening ports
+lsof -i -sTCP:LISTEN
+
+3. Process-Specific Monitoring
+# Check connections for specific process
+lsof -c process_name
+
+# Monitor connections by specific user
+lsof -u username
+
+4. Advanced Security Checks
+# Check for deleted but still open files (possible malware)
+lsof +L1
+
+# Check for processes with unknown network connections
+lsof -i | grep -v "(ESTABLISHED|LISTEN)"
+
+# Monitor UDP connections (often used in attacks)
+lsof -i UDP
+
+
+
+
