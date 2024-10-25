@@ -1,0 +1,26 @@
+#!/bin/bash
+while true; do
+    echo "=== Network Security Check $(date) ==="
+    
+    echo "1. Checking listening ports..."
+    netstat -tlpn
+    
+    echo "2. Checking established connections..."
+    netstat -tpn | grep ESTABLISHED
+    
+    echo "3. Checking for potential SYN flood..."
+    syn_count=$(netstat -tpn | grep SYN_RECV | wc -l)
+    if [ $syn_count -gt 10 ]; then
+        echo "WARNING: High number of SYN_RECV connections: $syn_count"
+    fi
+    
+    echo "4. Checking connection counts by IP..."
+    netstat -tpn | grep ESTABLISHED | \
+    awk '{print $5}' | cut -d: -f1 | sort | \
+    uniq -c | sort -nr | head -n 5
+    
+    echo "5. Checking for unusual open files..."
+    lsof -i | grep -v "(ESTABLISHED|LISTEN)"
+    
+    sleep 300  # Check every 5 minutes
+done
